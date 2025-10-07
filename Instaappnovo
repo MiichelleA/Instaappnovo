@@ -1,0 +1,2323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstaAI Creator - Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .dark-mode { background-color: #1f2937; color: #f9fafb; }
+        .dark-mode .bg-white { background-color: #374151; }
+        .dark-mode .text-gray-900 { color: #f9fafb; }
+        .dark-mode .text-gray-700 { color: #d1d5db; }
+        .dark-mode .text-gray-600 { color: #9ca3af; }
+        .dark-mode .border-gray-200 { border-color: #4b5563; }
+        .dark-mode .bg-gray-50 { background-color: #4b5563; }
+        .dark-mode .hover\:bg-gray-100:hover { background-color: #4b5563; }
+        .dark-mode .hover\:text-gray-900:hover { color: #f9fafb; }
+        .dark-mode .hover\:bg-gray-50:hover { background-color: #4b5563; }
+        .dark-mode .hover\:bg-indigo-50:hover { background-color: #4338ca; }
+        .dark-mode .text-indigo-600 { color: #818cf8; }
+        .dark-mode .bg-indigo-600 { background-color: #4f46e5; }
+        .dark-mode .hover\:bg-indigo-700:hover { background-color: #4338ca; }
+        .modal { display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .progress-bar { transition: width 0.5s ease; }
+        .drop-zone { border: 2px dashed #cbd5e1; transition: all 0.3s; }
+        .drop-zone.dragover { border-color: #4f46e5; background-color: #f0f9ff; }
+        .login-container { display: flex; }
+        .app-container { display: none; }
+        .generated-content { display: none; }
+        .oauth-step { display: none; }
+        .oauth-step.active { display: block; }
+        .scope-item { transition: all 0.2s; }
+        .scope-item:hover { background-color: #f3f4f6; }
+        .dark-mode .scope-item:hover { background-color: #4b5563; }
+        .avatar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; }
+        .generated-images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+        .training-step { display: none; }
+        .training-step.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="loginContainer" class="login-container min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div>
+                <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-indigo-600">
+                    <i class="fas fa-magic text-white text-xl"></i>
+                </div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">InstaAI Creator</h2>
+                <p class="mt-2 text-center text-sm text-gray-600">Faça login ou crie sua conta</p>
+            </div>
+            
+            <div id="loginForm" class="mt-8 space-y-6">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="email-address" class="sr-only">Email</label>
+                        <input id="email-address" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email">
+                    </div>
+                    <div>
+                        <label for="password" class="sr-only">Senha</label>
+                        <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Senha">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-900">
+                            Lembrar-me
+                        </label>
+                    </div>
+
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+                            Esqueceu sua senha?
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <button id="loginBtn" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </span>
+                        Entrar
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <span class="text-sm text-gray-600">Não tem uma conta? </span>
+                    <button id="showRegisterBtn" class="font-medium text-indigo-600 hover:text-indigo-500">
+                        Cadastre-se
+                    </button>
+                </div>
+            </div>
+
+            <div id="registerForm" class="mt-8 space-y-6" style="display: none;">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="register-name" class="sr-only">Nome completo</label>
+                        <input id="register-name" name="name" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Nome completo">
+                    </div>
+                    <div>
+                        <label for="register-email" class="sr-only">Email</label>
+                        <input id="register-email" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email">
+                    </div>
+                    <div>
+                        <label for="register-password" class="sr-only">Senha</label>
+                        <input id="register-password" name="password" type="password" autocomplete="new-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Senha">
+                    </div>
+                </div>
+
+                <div>
+                    <button id="registerBtn" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <i class="fas fa-user-plus"></i>
+                        </span>
+                        Cadastrar
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <span class="text-sm text-gray-600">Já tem uma conta? </span>
+                    <button id="showLoginBtn" class="font-medium text-indigo-600 hover:text-indigo-500">
+                        Faça login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="appContainer" class="app-container">
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 flex items-center">
+                            <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center">
+                                <i class="fas fa-magic text-white"></i>
+                            </div>
+                            <span class="ml-2 text-xl font-bold text-gray-900">InstaAI Creator</span>
+                        </div>
+                        <nav class="ml-6 hidden md:flex space-x-8">
+                            <a href="#" class="tab-link border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" data-tab="dashboard">
+                                Dashboard
+                            </a>
+                            <a href="#" class="tab-link border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" data-tab="create">
+                                Criar Conteúdo
+                            </a>
+                            <a href="#" class="tab-link border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" data-tab="avatars">
+                                Avatares
+                            </a>
+                            <a href="#" class="tab-link border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" data-tab="assistants">
+                                Assistentes
+                            </a>
+                            <a href="#" class="tab-link border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" data-tab="schedule">
+                                Agendados
+                            </a>
+                            <a href="#" class="tab-link border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" data-tab="settings">
+                                Configurações
+                            </a>
+                        </nav>
+                    </div>
+                    <div class="flex items-center">
+                        <button id="darkModeToggle" class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <div class="ml-3 relative">
+                            <div>
+                                <button class="flex text-sm rounded-full focus:outline-none" id="user-menu">
+                                    <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                        <span class="text-indigo-800 font-medium">JS</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <button id="logoutBtn" class="ml-3 text-sm text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div id="dashboard" class="tab-content active">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900">Bem-vindo de volta, João Silva!</h1>
+                    <p class="mt-1 text-sm text-gray-500">Aqui está o que está acontecendo com seu conteúdo hoje.</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 bg-indigo-100 rounded-md p-3">
+                                    <i class="fas fa-file-alt text-indigo-600"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Posts Gerados</dt>
+                                        <dd class="flex items-baseline">
+                                            <div class="text-2xl font-semibold text-gray-900">42</div>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 bg-green-100 rounded-md p-3">
+                                    <i class="fas fa-calendar-check text-green-600"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Agendados</dt>
+                                        <dd class="flex items-baseline">
+                                            <div class="text-2xl font-semibold text-gray-900">8</div>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 bg-yellow-100 rounded-md p-3">
+                                    <i class="fas fa-heart text-yellow-600"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Interações</dt>
+                                        <dd class="flex items-baseline">
+                                            <div class="text-2xl font-semibold text-gray-900">1.2K</div>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 bg-purple-100 rounded-md p-3">
+                                    <i class="fas fa-chart-line text-purple-600"></i>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Engajamento</dt>
+                                        <dd class="flex items-baseline">
+                                            <div class="text-2xl font-semibold text-gray-900">24%</div>
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Posts Agendados</h3>
+                        </div>
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-md bg-pink-100 flex items-center justify-center">
+                                            <i class="fab fa-instagram text-pink-600"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Promoção de Verão</div>
+                                            <div class="text-sm text-gray-500">Hoje, 15:30</div>
+                                        </div>
+                                    </div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Agendado
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-md bg-blue-100 flex items-center justify-center">
+                                            <i class="fab fa-facebook text-blue-600"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Dica do Dia</div>
+                                            <div class="text-sm text-gray-500">Amanhã, 10:00</div>
+                                        </div>
+                                    </div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        Processando
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-md bg-pink-100 flex items-center justify-center">
+                                            <i class="fab fa-instagram text-pink-600"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Receita Especial</div>
+                                            <div class="text-sm text-gray-500">25/10, 18:00</div>
+                                        </div>
+                                    </div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Agendado
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Conteúdo Recente</h3>
+                        </div>
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-16 w-16 rounded-md overflow-hidden">
+                                        <img src="https://via.placeholder.com/100" alt="Content" class="h-full w-full object-cover">
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <div class="text-sm font-medium text-gray-900">Novo Lançamento</div>
+                                        <div class="text-sm text-gray-500 mt-1">Instagram • 2 horas atrás</div>
+                                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                                            <i class="fas fa-heart mr-1"></i> 124
+                                            <i class="fas fa-comment ml-3 mr-1"></i> 18
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-16 w-16 rounded-md overflow-hidden">
+                                        <img src="https://via.placeholder.com/100" alt="Content" class="h-full w-full object-cover">
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <div class="text-sm font-medium text-gray-900">Tutorial Rápido</div>
+                                        <div class="text-sm text-gray-500 mt-1">Facebook • Ontem</div>
+                                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                                            <i class="fas fa-heart mr-1"></i> 87
+                                            <i class="fas fa-comment ml-3 mr-1"></i> 12
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-16 w-16 rounded-md overflow-hidden">
+                                        <img src="https://via.placeholder.com/100" alt="Content" class="h-full w-full object-cover">
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <div class="text-sm font-medium text-gray-900">Dica Profissional</div>
+                                        <div class="text-sm text-gray-500 mt-1">Instagram • 2 dias atrás</div>
+                                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                                            <i class="fas fa-heart mr-1"></i> 210
+                                            <i class="fas fa-comment ml-3 mr-1"></i> 34
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="create" class="tab-content">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900">Criar Novo Conteúdo</h1>
+                    <p class="mt-1 text-sm text-gray-500">Gere conteúdo com IA para suas redes sociais</p>
+                </div>
+
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-900">Configurações do Conteúdo</h3>
+                            <div class="flex space-x-2">
+                                <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    Salvar Rascunho
+                                </button>
+                                <button id="generateContentBtn" class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                                    Gerar Conteúdo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-6 py-5 space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tópico do Conteúdo</label>
+                            <input type="text" id="contentTopic" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Sobre o que você quer criar conteúdo?">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Conteúdo</label>
+                            <select id="contentType" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
+                                <option value="feed">Post do Feed</option>
+                                <option value="carousel">Carrossel</option>
+                                <option value="story">Story</option>
+                                <option value="reel">Reel</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo de IA</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="ai-model border border-gray-300 rounded-md p-3 cursor-pointer hover:border-indigo-500" data-model="openai">
+                                    <div class="font-medium text-sm">OpenAI</div>
+                                    <div class="text-xs text-gray-500 mt-1">GPT-4</div>
+                                </div>
+                                <div class="ai-model border border-gray-300 rounded-md p-3 cursor-pointer hover:border-indigo-500" data-model="gemini">
+                                    <div class="font-medium text-sm">Gemini</div>
+                                    <div class="text-xs text-gray-500 mt-1">Google</div>
+                                </div>
+                                <div class="ai-model border border-gray-300 rounded-md p-3 cursor-pointer hover:border-indigo-500" data-model="claude">
+                                    <div class="font-medium text-sm">Claude</div>
+                                    <div class="text-xs text-gray-500 mt-1">Anthropic</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Assistente de IA</label>
+                            <select class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
+                                <option>Assistente Padrão</option>
+                                <option>Profissional</option>
+                                <option>Casual</option>
+                                <option>Humorístico</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prompt Personalizado (Opcional)</label>
+                            <textarea rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Adicione instruções específicas para a IA..."></textarea>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input id="include-hashtags" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            <label for="include-hashtags" class="ml-2 block text-sm text-gray-700">
+                                Incluir Hashtags
+                            </label>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input id="generate-images" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                            <label for="generate-images" class="ml-2 block text-sm text-gray-700">
+                                Gerar Imagens
+                            </label>
+                        </div>
+
+                        <div id="imageOptions" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tamanho da Imagem</label>
+                                <select id="imageSize" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
+                                    <option value="square">Quadrado (1:1) - Instagram Feed</option>
+                                    <option value="portrait">Retrato (4:5) - Instagram Feed</option>
+                                    <option value="story">Story (9:16) - Instagram Story</option>
+                                    <option value="reel">Reel (9:16) - Instagram Reel</option>
+                                    <option value="landscape">Paisagem (16:9) - Facebook</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Número de Imagens</label>
+                                <select id="imageCount" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+
+                            <div class="flex items-center">
+                                <input id="use-avatar" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                <label for="use-avatar" class="ml-2 block text-sm text-gray-700">
+                                    Usar Avatar Personalizado
+                                </label>
+                            </div>
+
+                            <div id="avatarOptions" class="hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Selecione um Avatar</label>
+                                <div id="avatarSelection" class="grid grid-cols-3 gap-3">
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="generatedContent" class="generated-content mt-8 bg-white shadow rounded-lg overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Conteúdo Gerado</h3>
+                    </div>
+                    <div class="px-6 py-5">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900 mb-3">Prévia do Post</h4>
+                                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                    <div class="aspect-square bg-gray-100 flex items-center justify-center">
+                                        <img id="generatedImage" src="https://via.placeholder.com/400" alt="Generated content" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="p-4">
+                                        <div id="generatedCaption" class="font-medium text-sm mb-1">Seu conteúdo gerado aparecerá aqui...</div>
+                                        <div id="generatedHashtags" class="text-indigo-600 text-sm">#hashtag1 #hashtag2</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900 mb-3">Editar Conteúdo</h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Legenda</label>
+                                        <textarea id="editCaption" rows="4" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Edite a legenda..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Hashtags</label>
+                                        <input id="editHashtags" type="text" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Adicione hashtags...">
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button id="saveChangesBtn" class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                                            Salvar Alterações
+                                        </button>
+                                        <button id="schedulePostBtn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                            Agendar Post
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="text-sm font-medium text-gray-900 mb-3">Imagens Geradas</h4>
+                            <div id="generatedImagesGrid" class="generated-images-grid">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="avatars" class="tab-content">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900">Avatares Personalizados</h1>
+                    <p class="mt-1 text-sm text-gray-500">Crie avatares com IA para usar em seus posts</p>
+                </div>
+
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-medium text-gray-900">Seus Avatares</h3>
+                        <button id="createAvatarBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                            <i class="fas fa-plus mr-2"></i> Criar Novo Avatar
+                        </button>
+                    </div>
+
+                    <div class="px-6 py-5">
+                        <div id="avatarsGrid" class="avatar-grid">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center h-64">
+                                <i class="fas fa-plus-circle text-3xl text-gray-400 mb-2"></i>
+                                <div class="text-sm text-gray-500">Criar Novo Avatar</div>
+                                <button class="mt-3 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700">
+                                    Começar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="assistants" class="tab-content">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900">Assistentes de IA</h1>
+                    <p class="mt-1 text-sm text-gray-500">Crie assistentes personalizados para gerar conteúdo</p>
+                </div>
+
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-medium text-gray-900">Seus Assistentes</h3>
+                        <button id="createAssistantBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                            <i class="fas fa-plus mr-2"></i> Criar Assistente
+                        </button>
+                    </div>
+
+                    <div class="px-6 py-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="border border-gray-200 rounded-lg p-5">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-md bg-indigo-100 flex items-center justify-center">
+                                        <i class="fas fa-user-tie text-indigo-600"></i>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <div class="font-medium text-gray-900">Profissional</div>
+                                        <div class="text-sm text-gray-500 mt-1">Tom formal e técnico</div>
+                                        <div class="mt-3 text-sm text-gray-600">
+                                            "Crie conteúdo com linguagem profissional, adequado para negócios e comunicações corporativas."
+                                        </div>
+                                        <div class="mt-4 flex space-x-2">
+                                            <button class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                                                Editar
+                                            </button>
+                                            <button class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700">
+                                                Usar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border border-gray-200 rounded-lg p-5">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-md bg-green-100 flex items-center justify-center">
+                                        <i class="fas fa-smile text-green-600"></i>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <div class="font-medium text-gray-900">Casual</div>
+                                        <div class="text-sm text-gray-500 mt-1">Tom descontraído e amigável</div>
+                                        <div class="mt-3 text-sm text-gray-600">
+                                            "Crie conteúdo com linguagem informal, como se estivesse conversando com amigos."
+                                        </div>
+                                        <div class="mt-4 flex space-x-2">
+                                            <button class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                                                Editar
+                                            </button>
+                                            <button class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700">
+                                                Usar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border border-gray-200 rounded-lg p-5">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-md bg-yellow-100 flex items-center justify-center">
+                                        <i class="fas fa-laugh text-yellow-600"></i>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <div class="font-medium text-gray-900">Humorístico</div>
+                                        <div class="text-sm text-gray-500 mt-1">Tom divertido e engraçado</div>
+                                        <div class="mt-3 text-sm text-gray-600">
+                                            "Crie conteúdo com piadas, memes e linguagem descontraída para engajar seu público."
+                                        </div>
+                                        <div class="mt-4 flex space-x-2">
+                                            <button class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                                                Editar
+                                            </button>
+                                            <button class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700">
+                                                Usar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-8">
+                                <i class="fas fa-plus-circle text-3xl text-gray-400 mb-2"></i>
+                                <div class="text-sm text-gray-500 mb-3">Criar Novo Assistente</div>
+                                <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700">
+                                    Começar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="schedule" class="tab-content">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900">Posts Agendados</h1>
+                    <p class="mt-1 text-sm text-gray-500">Gerencie seus posts agendados</p>
+                </div>
+
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-medium text-gray-900">Calendário de Publicações</h3>
+                        <div class="flex space-x-2">
+                            <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                <i class="fas fa-filter mr-2"></i> Filtrar
+                            </button>
+                            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                                <i class="fas fa-plus mr-2"></i> Novo Post
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="px-6 py-5">
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-medium text-gray-900">Outubro 2023</h3>
+                                <div class="flex space-x-2">
+                                    <button class="p-1 rounded-md hover:bg-gray-100">
+                                        <i class="fas fa-chevron-left text-gray-500"></i>
+                                    </button>
+                                    <button class="p-1 rounded-md hover:bg-gray-100">
+                                        <i class="fas fa-chevron-right text-gray-500"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-7 gap-1 mb-2">
+                                <div class="text-center text-xs font-medium text-gray-500 py-2">Dom</div>
+                                <div class="text-center text-xs font-medium text-gray-500 py-2">Seg</div>
+                                <div class="text-center text-xs font-medium text-gray-500 py-2">Ter</div>
+                                <div class="text-center text-xs font-medium text-gray-500 py-2">Qua</div>
+                                <div class="text-center text-xs font-medium text-gray-500 py-2">Qui</div>
+                                <div class="text-center text-xs font-medium text-gray-500 py-2">Sex</div>
+                                <div class="text-center text-xs font-medium text-gray-500 py-2">Sáb</div>
+                            </div>
+                            
+                            <div class="grid grid-cols-7 gap-1">
+                                <div class="text-center py-2 text-sm text-gray-400">1</div>
+                                <div class="text-center py-2 text-sm text-gray-400">2</div>
+                                <div class="text-center py-2 text-sm text-gray-400">3</div>
+                                <div class="text-center py-2 text-sm text-gray-400">4</div>
+                                <div class="text-center py-2 text-sm text-gray-400">5</div>
+                                <div class="text-center py-2 text-sm text-gray-400">6</div>
+                                <div class="text-center py-2 text-sm text-gray-400">7</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">8</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">9</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">10</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">11</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">12</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">13</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">14</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer relative">
+                                    15
+                                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-indigo-600 rounded-full"></div>
+                                </div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">16</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">17</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">18</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">19</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer relative">
+                                    20
+                                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-indigo-600 rounded-full"></div>
+                                </div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">21</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">22</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">23</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">24</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer relative">
+                                    25
+                                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-indigo-600 rounded-full"></div>
+                                </div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">26</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">27</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">28</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">29</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">30</div>
+                                <div class="text-center py-2 text-sm text-gray-900 hover:bg-gray-100 rounded cursor-pointer">31</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Posts Agendados</h3>
+                            <div class="space-y-4">
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start">
+                                            <div class="flex-shrink-0 h-12 w-12 rounded-md overflow-hidden">
+                                                <img src="https://via.placeholder.com/100" alt="Content" class="h-full w-full object-cover">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Promoção de Verão</div>
+                                                <div class="text-sm text-gray-500 mt-1">Instagram • Hoje, 15:30</div>
+                                                <div class="mt-2 text-sm text-gray-600">
+                                                    Aproveite nossas promoções de verão com até 50% de desconto em produtos selecionados...
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Agendado
+                                            </span>
+                                            <div class="flex">
+                                                <button class="p-1 text-gray-400 hover:text-gray-500">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="p-1 text-gray-400 hover:text-gray-500">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                                <button class="p-1 text-gray-400 hover:text-red-500">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start">
+                                            <div class="flex-shrink-0 h-12 w-12 rounded-md overflow-hidden">
+                                                <img src="https://via.placeholder.com/100" alt="Content" class="h-full w-full object-cover">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Dica do Dia</div>
+                                                <div class="text-sm text-gray-500 mt-1">Facebook • Amanhã, 10:00</div>
+                                                <div class="mt-2 text-sm text-gray-600">
+                                                    Dica profissional: organize sua semana usando a técnica do time blocking...
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                Processando
+                                            </span>
+                                            <div class="flex">
+                                                <button class="p-1 text-gray-400 hover:text-gray-500">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="p-1 text-gray-400 hover:text-gray-500">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                                <button class="p-1 text-gray-400 hover:text-red-500">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start">
+                                            <div class="flex-shrink-0 h-12 w-12 rounded-md overflow-hidden">
+                                                <img src="https://via.placeholder.com/100" alt="Content" class="h-full w-full object-cover">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Receita Especial</div>
+                                                <div class="text-sm text-gray-500 mt-1">Instagram • 25/10, 18:00</div>
+                                                <div class="mt-2 text-sm text-gray-600">
+                                                    Receita deliciosa e fácil de fazer: torta de limão sem lactose...
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Agendado
+                                            </span>
+                                            <div class="flex">
+                                                <button class="p-1 text-gray-400 hover:text-gray-500">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="p-1 text-gray-400 hover:text-gray-500">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                                <button class="p-1 text-gray-400 hover:text-red-500">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings" class="tab-content">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900">Configurações</h1>
+                    <p class="mt-1 text-sm text-gray-500">Gerencie sua conta e preferências</p>
+                </div>
+
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Configurações da Conta</h3>
+                    </div>
+
+                    <div class="px-6 py-5 space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                            <input type="text" value="João Silva" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" value="joao.silva@example.com" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Plano</label>
+                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-md">
+                                <div>
+                                    <div class="font-medium text-gray-900">Plano Pro</div>
+                                    <div class="text-sm text-gray-500">Renova em 15/11/2023</div>
+                                </div>
+                                <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700">
+                                    Gerenciar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm text-gray-500">••••••••</div>
+                                <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    Alterar Senha
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-5 border-t border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Redes Sociais Conectadas</h3>
+                            
+                            <div class="space-y-4" id="connectedAccounts">
+                                <div class="social-account flex items-center justify-between p-4 border border-gray-200 rounded-lg" data-platform="instagram">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-md bg-pink-100 flex items-center justify-center">
+                                            <i class="fab fa-instagram text-pink-600"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Instagram</div>
+                                            <div class="text-sm text-gray-500" data-username="@seu_perfil">@seu_perfil</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            Conectado
+                                        </span>
+                                        <button class="disconnect-btn inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50" data-platform="instagram">
+                                            Desconectar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="social-account flex items-center justify-between p-4 border border-gray-200 rounded-lg" data-platform="facebook">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-md bg-blue-100 flex items-center justify-center">
+                                            <i class="fab fa-facebook text-blue-600"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Facebook</div>
+                                            <div class="text-sm text-gray-500" data-username="Sua Página">Sua Página</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            Conectado
+                                        </span>
+                                        <button class="disconnect-btn inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50" data-platform="facebook">
+                                            Desconectar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="social-account flex items-center justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg" data-platform="tiktok">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center">
+                                            <i class="fab fa-tiktok text-gray-600"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">TikTok</div>
+                                            <div class="text-sm text-gray-500" data-username="Não conectado">Não conectado</div>
+                                        </div>
+                                    </div>
+                                    <button class="connect-btn inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700" data-platform="tiktok">
+                                        Conectar
+                                    </button>
+                                </div>
+
+                                <div class="social-account flex items-center justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg" data-platform="linkedin">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-md bg-blue-700 flex items-center justify-center">
+                                            <i class="fab fa-linkedin text-white"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">LinkedIn</div>
+                                            <div class="text-sm text-gray-500" data-username="Não conectado">Não conectado</div>
+                                        </div>
+                                    </div>
+                                    <button class="connect-btn inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700" data-platform="linkedin">
+                                        Conectar
+                                    </button>
+                                </div>
+
+                                <div class="social-account flex items-center justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg" data-platform="youtube">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-md bg-red-600 flex items-center justify-center">
+                                            <i class="fab fa-youtube text-white"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">YouTube</div>
+                                            <div class="text-sm text-gray-500" data-username="Não conectado">Não conectado</div>
+                                        </div>
+                                    </div>
+                                    <button class="connect-btn inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700" data-platform="youtube">
+                                        Conectar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-5 border-t border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Configurações de API</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chave da API OpenAI</label>
+                                    <div class="flex">
+                                        <input type="password" value="sk-••••••••••••••••••••••••••••••••" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-l-md p-2 border border-r-0" readonly>
+                                        <button class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 bg-gray-50 text-sm font-medium text-gray-700 rounded-r-md hover:bg-gray-100">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chave da API Gemini</label>
+                                    <div class="flex">
+                                        <input type="password" value="AI••••••••••••••••••••••••••••••••" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-l-md p-2 border border-r-0" readonly>
+                                        <button class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 bg-gray-50 text-sm font-medium text-gray-700 rounded-r-md hover:bg-gray-100">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Configurações do Cloudinary</label>
+                                    <div class="space-y-2">
+                                        <input type="text" value="instaai-creator" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Cloud Name">
+                                        <input type="text" value="••••••••••••••••••••••••••••••••" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="API Key">
+                                        <input type="password" value="••••••••••••••••••••••••••••••••" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="API Secret">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-5 border-t border-gray-200 flex justify-end">
+                            <button class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                Cancelar
+                            </button>
+                            <button class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                                Salvar Alterações
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="generateContentModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Gerando Conteúdo</h3>
+            </div>
+            <div class="px-6 py-5">
+                <div class="text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-magic text-4xl text-indigo-600"></i>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Nossa IA está criando seu conteúdo...</p>
+                    
+                    <div class="mb-4">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="progressBar" class="bg-indigo-600 h-2.5 rounded-full progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <p id="progressText" class="text-sm text-gray-500">Iniciando geração...</p>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button id="cancelGenerateBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="createAvatarModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900">Criar Novo Avatar</h3>
+                <button id="closeAvatarModal" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="px-6 py-5">
+                <div class="mb-6">
+                    <p class="text-sm text-gray-600 mb-4">Envie 10-15 fotos do seu rosto para criar um avatar personalizado com IA.</p>
+                    
+                    <div id="dropZone" class="drop-zone rounded-lg p-8 text-center cursor-pointer">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                        <p class="text-sm text-gray-600 mb-2">Arraste e solte as fotos aqui</p>
+                        <p class="text-xs text-gray-500 mb-4">ou</p>
+                        <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                            Selecionar Arquivos
+                        </button>
+                        <input type="file" id="fileInput" class="hidden" multiple accept="image/*">
+                    </div>
+                    
+                    <div id="uploadedImages" class="mt-4 grid grid-cols-5 gap-2 hidden">
+                        </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Avatar</label>
+                    <input type="text" id="avatarName" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Ex: Avatar Principal">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Estilo</label>
+                    <select class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
+                        <option>Realista</option>
+                        <option>Ilustração</option>
+                        <option>Anime</option>
+                        <option>Cartoon</option>
+                    </select>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button id="cancelAvatarBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button id="trainAvatarBtn" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                    Treinar Avatar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="trainAvatarModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Treinando Avatar</h3>
+            </div>
+            <div class="px-6 py-5">
+                <div id="trainingStep1" class="training-step active">
+                    <div class="text-center mb-6">
+                        <div class="mb-4">
+                            <i class="fas fa-brain text-4xl text-indigo-600"></i>
+                        </div>
+                        <h4 class="text-xl font-semibold text-gray-900 mb-2">Processando Imagens</h4>
+                        <p class="text-gray-600">Analisando as fotos enviadas para extrair características faciais...</p>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700">Progresso:</span>
+                            <span id="trainingProgress" class="text-sm text-gray-500">25%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="trainingProgressBar" class="bg-indigo-600 h-3 rounded-full progress-bar" style="width: 25%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="trainingStep2" class="training-step">
+                    <div class="text-center mb-6">
+                        <div class="mb-4">
+                            <i class="fas fa-magic text-4xl text-indigo-600"></i>
+                        </div>
+                        <h4 class="text-xl font-semibold text-gray-900 mb-2">Criando Modelo</h4>
+                        <p class="text-gray-600">Gerando o modelo 3D do seu avatar com tecnologia de IA...</p>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700">Progresso:</span>
+                            <span class="text-sm text-gray-500">50%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-indigo-600 h-3 rounded-full progress-bar" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="trainingStep3" class="training-step">
+                    <div class="text-center mb-6">
+                        <div class="mb-4">
+                            <i class="fas fa-check-circle text-4xl text-green-600"></i>
+                        </div>
+                        <h4 class="text-xl font-semibold text-gray-900 mb-2">Avatar Pronto!</h4>
+                        <p class="text-gray-600">Seu avatar personalizado foi criado com sucesso e já está disponível para uso.</p>
+                    </div>
+                    
+                    <div class="bg-green-50 border border-green-200 p-4 rounded-lg mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-green-800">Sucesso!</h3>
+                                <div class="mt-2 text-sm text-green-700">
+                                    <p>Seu avatar agora está disponível na seção de avatares e pode ser usado para gerar imagens personalizadas.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button id="closeTrainingModal" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                    Ver Avatar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="createAssistantModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900">Criar Novo Assistente</h3>
+                <button id="closeAssistantModal" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="px-6 py-5">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Assistente</label>
+                        <input type="text" id="assistantName" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Ex: Vendedor Profissional">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tom</label>
+                        <select id="assistantTone" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
+                            <option value="professional">Profissional</option>
+                            <option value="casual">Casual</option>
+                            <option value="friendly">Amigável</option>
+                            <option value="humorous">Humorístico</option>
+                            <option value="formal">Formal</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prompt do Sistema</label>
+                        <textarea id="assistantPrompt" rows="6" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Descreva como este assistente deve se comportar..."></textarea>
+                        <p class="mt-1 text-xs text-gray-500">Seja específico sobre o tone, estilo e preferências de conteúdo.</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Exemplo de Conteúdo</label>
+                        <textarea id="assistantExample" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Mostre um exemplo do tipo de conteúdo que este assistente deve gerar..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button id="cancelAssistantBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button id="saveAssistantBtn" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                    Criar Assistente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="connectSocialModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900">Conectar Conta Social</h3>
+                <button id="closeConnectModal" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="px-6 py-5">
+                <div id="oauthStep1" class="oauth-step active">
+                    <div class="text-center mb-6">
+                        <div id="socialIconLarge" class="text-6xl mb-4">
+                            <i class="fab fa-instagram text-pink-600"></i>
+                        </div>
+                        <h4 class="text-xl font-semibold text-gray-900 mb-2">Conectar ao Instagram</h4>
+                        <p class="text-gray-600">Para publicar conteúdo automaticamente, precisamos da sua permissão para acessar sua conta.</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                        <h5 class="text-lg font-medium text-gray-900 mb-4">Permissões necessárias:</h5>
+                        <div class="space-y-3">
+                            <div class="scope-item p-3 rounded-lg border border-gray-200">
+                                <div class="flex items-start">
+                                    <i class="fas fa-user-circle text-indigo-600 mt-1 mr-3"></i>
+                                    <div>
+                                        <h6 class="font-medium text-gray-900">Informações Básicas</h6>
+                                        <p class="text-sm text-gray-600">Acessar seu nome, foto de perfil e informações públicas</p>
+                                        <code class="text-xs bg-gray-200 px-2 py-1 rounded mt-1">basic</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="scope-item p-3 rounded-lg border border-gray-200">
+                                <div class="flex items-start">
+                                    <i class="fas fa-images text-indigo-600 mt-1 mr-3"></i>
+                                    <div>
+                                        <h6 class="font-medium text-gray-900">Conteúdo e Mídia</h6>
+                                        <p class="text-sm text-gray-600">Criar, editar e publicar posts, stories e reels</p>
+                                        <code class="text-xs bg-gray-200 px-2 py-1 rounded mt-1">content_publish</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="scope-item p-3 rounded-lg border border-gray-200">
+                                <div class="flex items-start">
+                                    <i class="fas fa-heart text-indigo-600 mt-1 mr-3"></i>
+                                    <div>
+                                        <h6 class="font-medium text-gray-900">Interações</h6>
+                                        <p class="text-sm text-gray-600">Curtir, comentar e salvar posts em seu nome</p>
+                                        <code class="text-xs bg-gray-200 px-2 py-1 rounded mt-1">interactions</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="scope-item p-3 rounded-lg border border-gray-200">
+                                <div class="flex items-start">
+                                    <i class="fas fa-bullhorn text-indigo-600 mt-1 mr-3"></i>
+                                    <div>
+                                        <h6 class="font-medium text-gray-900">Gerenciamento de Páginas</h6>
+                                        <p class="text-sm text-gray-600">Acessar e gerenciar páginas de negócios</p>
+                                        <code class="text-xs bg-gray-200 px-2 py-1 rounded mt-1">pages_manage_posts</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="scope-item p-3 rounded-lg border border-gray-200">
+                                <div class="flex items-start">
+                                    <i class="fas fa-chart-line text-indigo-600 mt-1 mr-3"></i>
+                                    <div>
+                                        <h6 class="font-medium text-gray-900">Análises e Insights</h6>
+                                        <p class="text-sm text-gray-600">Acessar estatísticas e métricas de desempenho</p>
+                                        <code class="text-xs bg-gray-200 px-2 py-1 rounded mt-1">read_insights</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="scope-item p-3 rounded-lg border border-gray-200">
+                                <div class="flex items-start">
+                                    <i class="fas fa-hashtag text-indigo-600 mt-1 mr-3"></i>
+                                    <div>
+                                        <h6 class="font-medium text-gray-900">Hashtags e Menções</h6>
+                                        <p class="text-sm text-gray-600">Pesquisar e usar hashtags, mencionar outros usuários</p>
+                                        <code class="text-xs bg-gray-200 px-2 py-1 rounded mt-1">hashtags</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancelConnectBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button id="proceedToAuthBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                            Continuar
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="oauthStep2" class="oauth-step">
+                    <div class="text-center mb-6">
+                        <div class="mb-4">
+                            <i class="fas fa-lock text-4xl text-indigo-600"></i>
+                        </div>
+                        <h4 class="text-xl font-semibold text-gray-900 mb-2">Autenticação Segura</h4>
+                        <p class="text-gray-600">Você será redirecionado para o Instagram para autorizar o acesso.</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-blue-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">Importante</h3>
+                                <div class="mt-2 text-sm text-blue-700">
+                                    <p>Após autorizar, você será redirecionado de volta para o InstaAI Creator. Não feche esta janela durante o processo.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <h5 class="font-medium text-gray-900 mb-2">O que acontecerá:</h5>
+                        <ol class="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                            <li>Você será redirecionado para instagram.com</li>
+                            <li>Faça login com suas credenciais do Instagram</li>
+                            <li>Revise as permissões solicitadas</li>
+                            <li>Autorize o acesso ao InstaAI Creator</li>
+                            <li>Você será automaticamente redirecionado de volta</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button id="backToScopesBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Voltar
+                        </button>
+                        <button id="startAuthBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                            <i class="fas fa-external-link-alt mr-2"></i> Ir para Instagram
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="oauthStep3" class="oauth-step">
+                    <div class="text-center mb-6">
+                        <div class="mb-4">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                        </div>
+                        <h4 class="text-xl font-semibold text-gray-900 mb-2">Conectando...</h4>
+                        <p class="text-gray-600">Aguardando autorização do Instagram</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700">Progresso:</span>
+                            <span id="authProgress" class="text-sm text-gray-500">50%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="authProgressBar" class="bg-indigo-600 h-2 rounded-full" style="width: 50%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <p class="text-sm text-gray-500 mb-4">Se a janela não abrir automaticamente, clique no botão abaixo:</p>
+                        <button id="retryAuthBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fas fa-redo mr-2"></i> Tentar Novamente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="schedulePostModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Agendar Post</h3>
+            </div>
+            <div class="px-6 py-5">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Conta Social</label>
+                        <select class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
+                            <option>Instagram: @seu_perfil</option>
+                            <option>Facebook: Sua Página</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label>
+                        <input type="datetime-local" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border">
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-900 mb-2">Resumo do Post</h4>
+                        <div class="text-sm text-gray-600 truncate" id="scheduledPostSummary">Seu conteúdo agendado aparecerá aqui...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-between">
+                <button id="cancelScheduleBtn" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <div class="space-x-2">
+                    <button id="postNowBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+                        Publicar Agora
+                    </button>
+                    <button id="confirmScheduleBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                        Agendar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Global variables
+            let avatars = [];
+            let generatedImages = [];
+            let currentAvatar = null;
+            
+            // Login/Register functionality
+            const loginContainer = document.getElementById('loginContainer');
+            const appContainer = document.getElementById('appContainer');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const showRegisterBtn = document.getElementById('showRegisterBtn');
+            const showLoginBtn = document.getElementById('showLoginBtn');
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            showRegisterBtn.addEventListener('click', function() {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            });
+
+            showLoginBtn.addEventListener('click', function() {
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
+            });
+
+            loginBtn.addEventListener('click', function() {
+                const email = document.getElementById('email-address').value;
+                const password = document.getElementById('password').value;
+                
+                if (email && password) {
+                    // Simulate login
+                    loginContainer.style.display = 'none';
+                    appContainer.style.display = 'block';
+                    initializeApp();
+                } else {
+                    alert('Por favor, preencha todos os campos.');
+                }
+            });
+
+            registerBtn.addEventListener('click', function() {
+                const name = document.getElementById('register-name').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                
+                if (name && email && password) {
+                    // Simulate registration
+                    alert('Conta criada com sucesso! Faça login para continuar.');
+                    registerForm.style.display = 'none';
+                    loginForm.style.display = 'block';
+                } else {
+                    alert('Por favor, preencha todos os campos.');
+                }
+            });
+
+            logoutBtn.addEventListener('click', function() {
+                appContainer.style.display = 'none';
+                loginContainer.style.display = 'flex';
+                // Reset forms
+                document.getElementById('email-address').value = '';
+                document.getElementById('password').value = '';
+                document.getElementById('register-name').value = '';
+                document.getElementById('register-email').value = '';
+                document.getElementById('register-password').value = '';
+            });
+
+            // Initialize app
+            function initializeApp() {
+                loadAvatars();
+                updateAvatarSelection();
+            }
+
+            // Tab navigation
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab link
+                    tabLinks.forEach(l => {
+                        l.classList.remove('border-indigo-500', 'text-gray-900');
+                        l.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    this.classList.remove('border-transparent', 'text-gray-500');
+                    this.classList.add('border-indigo-500', 'text-gray-900');
+                    
+                    // Update active tab content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Dark mode toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                
+                // Toggle icon
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            });
+            
+            // AI Model Selection
+            const aiModels = document.querySelectorAll('.ai-model');
+            aiModels.forEach(model => {
+                model.addEventListener('click', function() {
+                    aiModels.forEach(m => {
+                        m.classList.remove('border-indigo-500', 'bg-indigo-50');
+                        m.classList.add('border-gray-300');
+                    });
+                    this.classList.remove('border-gray-300');
+                    this.classList.add('border-indigo-500', 'bg-indigo-50');
+                });
+            });
+            
+            // Generate Content Button
+            const generateContentBtn = document.getElementById('generateContentBtn');
+            const generateContentModal = document.getElementById('generateContentModal');
+            const cancelGenerateBtn = document.getElementById('cancelGenerateBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const generatedContent = document.getElementById('generatedContent');
+            
+            generateContentBtn.addEventListener('click', function() {
+                const topic = document.getElementById('contentTopic').value;
+                if (!topic) {
+                    alert('Por favor, insira um tópico para gerar conteúdo.');
+                    return;
+                }
+                
+                generateContentModal.classList.add('active');
+                
+                // Simulate progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    progressBar.style.width = progress + '%';
+                    
+                    if (progress <= 30) {
+                        progressText.textContent = 'Analisando tópico...';
+                    } else if (progress <= 60) {
+                        progressText.textContent = 'Gerando texto com IA...';
+                    } else if (progress <= 90) {
+                        progressText.textContent = 'Criando imagens...';
+                    } else {
+                        progressText.textContent = 'Finalizando...';
+                    }
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            generateContentModal.classList.remove('active');
+                            progressBar.style.width = '0%';
+                            progressText.textContent = 'Iniciando geração...';
+                            
+                            // Show generated content
+                            showGeneratedContent();
+                        }, 1000);
+                    }
+                }, 300);
+            });
+            
+            function showGeneratedContent() {
+                // Simulate generated content
+                const topic = document.getElementById('contentTopic').value;
+                const contentType = document.getElementById('contentType').value;
+                const imageCount = parseInt(document.getElementById('imageCount').value);
+                
+                // Update generated content
+                document.getElementById('generatedCaption').textContent = `Ótimo conteúdo sobre ${topic}! Este post foi gerado por IA para engajar seu público.`;
+                document.getElementById('generatedHashtags').textContent = `#${topic.replace(/\s+/g, '')} #marketing #socialmedia`;
+                document.getElementById('editCaption').value = `Ótimo conteúdo sobre ${topic}! Este post foi gerado por IA para engajar seu público.`;
+                document.getElementById('editHashtags').value = `#${topic.replace(/\s+/g, '')} #marketing #socialmedia`;
+                
+                // Generate and display images
+                generateAndDisplayImages(topic, imageCount);
+                
+                // Show generated content section
+                generatedContent.style.display = 'block';
+                generatedContent.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            function generateAndDisplayImages(topic, count) {
+                const imagesGrid = document.getElementById('generatedImagesGrid');
+                imagesGrid.innerHTML = '';
+                
+                // Generate image URLs
+                generatedImages = [];
+                for (let i = 0; i < count; i++) {
+                    const imageUrl = `https://picsum.photos/seed/${topic}${i}/300/300.jpg`;
+                    generatedImages.push(imageUrl);
+                    
+                    // Create image element
+                    const imageDiv = document.createElement('div');
+                    imageDiv.className = 'relative group cursor-pointer';
+                    imageDiv.innerHTML = `
+                        <img src="${imageUrl}" alt="Generated image ${i + 1}" class="w-full h-40 object-cover rounded-lg">
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
+                            <button class="opacity-0 group-hover:opacity-100 bg-white text-gray-800 px-3 py-1 rounded-md text-sm font-medium">
+                                Selecionar
+                            </button>
+                        </div>
+                    `;
+                    
+                    imagesGrid.appendChild(imageDiv);
+                }
+                
+                // Update main preview with first image
+                if (generatedImages.length > 0) {
+                    document.getElementById('generatedImage').src = generatedImages[0];
+                }
+            }
+            
+            cancelGenerateBtn.addEventListener('click', function() {
+                generateContentModal.classList.remove('active');
+            });
+            
+            // Save Changes Button
+            const saveChangesBtn = document.getElementById('saveChangesBtn');
+            saveChangesBtn.addEventListener('click', function() {
+                const caption = document.getElementById('editCaption').value;
+                const hashtags = document.getElementById('editHashtags').value;
+                
+                // Update preview
+                document.getElementById('generatedCaption').textContent = caption;
+                document.getElementById('generatedHashtags').textContent = hashtags;
+                
+                alert('Alterações salvas com sucesso!');
+            });
+            
+            // Schedule Post Button
+            const schedulePostBtn = document.getElementById('schedulePostBtn');
+            const schedulePostModal = document.getElementById('schedulePostModal');
+            const cancelScheduleBtn = document.getElementById('cancelScheduleBtn');
+            const confirmScheduleBtn = document.getElementById('confirmScheduleBtn');
+            const postNowBtn = document.getElementById('postNowBtn');
+            
+            schedulePostBtn.addEventListener('click', function() {
+                const caption = document.getElementById('editCaption').value;
+                document.getElementById('scheduledPostSummary').textContent = caption;
+                schedulePostModal.classList.add('active');
+            });
+            
+            cancelScheduleBtn.addEventListener('click', function() {
+                schedulePostModal.classList.remove('active');
+            });
+            
+            confirmScheduleBtn.addEventListener('click', function() {
+                schedulePostModal.classList.remove('active');
+                alert('Post agendado com sucesso!');
+            });
+            
+            postNowBtn.addEventListener('click', function() {
+                schedulePostModal.classList.remove('active');
+                alert('Post publicado com sucesso!');
+            });
+            
+            // Avatar functionality
+            const createAvatarBtn = document.getElementById('createAvatarBtn');
+            const createAvatarModal = document.getElementById('createAvatarModal');
+            const closeAvatarModal = document.getElementById('closeAvatarModal');
+            const cancelAvatarBtn = document.getElementById('cancelAvatarBtn');
+            const trainAvatarBtn = document.getElementById('trainAvatarBtn');
+            const trainAvatarModal = document.getElementById('trainAvatarModal');
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const uploadedImages = document.getElementById('uploadedImages');
+            const avatarName = document.getElementById('avatarName');
+            
+            createAvatarBtn.addEventListener('click', function() {
+                createAvatarModal.classList.add('active');
+            });
+            
+            closeAvatarModal.addEventListener('click', function() {
+                createAvatarModal.classList.remove('active');
+            });
+            
+            cancelAvatarBtn.addEventListener('click', function() {
+                createAvatarModal.classList.remove('active');
+            });
+            
+            // File upload functionality
+            dropZone.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            dropZone.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+            
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                handleAvatarFiles(files);
+            });
+            
+            fileInput.addEventListener('change', function() {
+                handleAvatarFiles(this.files);
+            });
+            
+            function handleAvatarFiles(files) {
+                if (files.length > 0) {
+                    uploadedImages.classList.remove('hidden');
+                    uploadedImages.innerHTML = '';
+                    
+                    for (let i = 0; i < Math.min(files.length, 15); i++) {
+                        const file = files[i];
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'w-full h-full object-cover rounded';
+                            
+                            const div = document.createElement('div');
+                            div.className = 'aspect-square rounded overflow-hidden border';
+                            div.appendChild(img);
+                            
+                            uploadedImages.appendChild(div);
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                }
+            }
+            
+            trainAvatarBtn.addEventListener('click', function() {
+                const name = avatarName.value;
+                if (!name) {
+                    alert('Por favor, dê um nome para o seu avatar.');
+                    return;
+                }
+                
+                createAvatarModal.classList.remove('active');
+                trainAvatarModal.classList.add('active');
+                
+                // Start training process
+                startAvatarTraining(name);
+            });
+            
+            function startAvatarTraining(name) {
+                const trainingSteps = document.querySelectorAll('.training-step');
+                const trainingProgress = document.getElementById('trainingProgress');
+                const trainingProgressBar = document.getElementById('trainingProgressBar');
+                
+                let currentStep = 0;
+                
+                function nextStep() {
+                    trainingSteps.forEach(step => step.classList.remove('active'));
+                    
+                    if (currentStep < trainingSteps.length) {
+                        trainingSteps[currentStep].classList.add('active');
+                        
+                        // Update progress
+                        const progress = ((currentStep + 1) / trainingSteps.length) * 100;
+                        trainingProgress.textContent = Math.round(progress) + '%';
+                        trainingProgressBar.style.width = progress + '%';
+                        
+                        // Move to next step after delay
+                        setTimeout(() => {
+                            currentStep++;
+                            nextStep();
+                        }, 2000);
+                    } else {
+                        // Training completed
+                        setTimeout(() => {
+                            trainAvatarModal.classList.remove('active');
+                            
+                            // Add avatar to list
+                            const newAvatar = {
+                                id: Date.now(),
+                                name: name,
+                                style: document.querySelector('#createAvatarModal select').value,
+                                image: `https://via.placeholder.com/200?text=${encodeURIComponent(name)}`,
+                                createdAt: new Date().toLocaleDateString('pt-BR')
+                            };
+                            
+                            avatars.push(newAvatar);
+                            saveAvatars();
+                            loadAvatars();
+                            
+                            alert(`Avatar "${name}" criado com sucesso!`);
+                        }, 1000);
+                    }
+                }
+                
+                nextStep();
+            }
+            
+            const closeTrainingModal = document.getElementById('closeTrainingModal');
+            closeTrainingModal.addEventListener('click', function() {
+                trainAvatarModal.classList.remove('active');
+                resetTrainingSteps();
+            });
+            
+            function resetTrainingSteps() {
+                document.querySelectorAll('.training-step').forEach(step => {
+                    step.classList.remove('active');
+                });
+                document.getElementById('trainingStep1').classList.add('active');
+                document.getElementById('trainingProgress').textContent = '25%';
+                document.getElementById('trainingProgressBar').style.width = '25%';
+            }
+            
+            // Load and save avatars
+            function saveAvatars() {
+                localStorage.setItem('instaai_avatars', JSON.stringify(avatars));
+            }
+            
+            function loadAvatars() {
+                const saved = localStorage.getItem('instaai_avatars');
+                if (saved) {
+                    avatars = JSON.parse(saved);
+                }
+                
+                displayAvatars();
+                updateAvatarSelection();
+            }
+            
+            function displayAvatars() {
+                const avatarsGrid = document.getElementById('avatarsGrid');
+                avatarsGrid.innerHTML = '';
+                
+                if (avatars.length === 0) {
+                    avatarsGrid.innerHTML = `
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center h-64">
+                            <i class="fas fa-plus-circle text-3xl text-gray-400 mb-2"></i>
+                            <div class="text-sm text-gray-500">Criar Novo Avatar</div>
+                            <button class="mt-3 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700">
+                                Começar
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                avatars.forEach(avatar => {
+                    const avatarDiv = document.createElement('div');
+                    avatarDiv.className = 'border border-gray-200 rounded-lg overflow-hidden';
+                    avatarDiv.innerHTML = `
+                        <div class="h-48 bg-gray-100 flex items-center justify-center">
+                            <img src="${avatar.image}" alt="${avatar.name}" class="h-full w-full object-cover">
+                        </div>
+                        <div class="p-4">
+                            <div class="font-medium text-gray-900">${avatar.name}</div>
+                            <div class="text-sm text-gray-500 mt-1">Criado em ${avatar.createdAt}</div>
+                            <div class="mt-3 flex space-x-2">
+                                <button class="use-avatar-btn inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50" data-avatar-id="${avatar.id}">
+                                    Usar
+                                </button>
+                                <button class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                                    Editar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    avatarsGrid.appendChild(avatarDiv);
+                });
+                
+                // Add "Create New Avatar" button
+                const createNewDiv = document.createElement('div');
+                createNewDiv.className = 'border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center h-64';
+                createNewDiv.innerHTML = `
+                    <i class="fas fa-plus-circle text-3xl text-gray-400 mb-2"></i>
+                    <div class="text-sm text-gray-500">Criar Novo Avatar</div>
+                    <button class="mt-3 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700">
+                        Começar
+                    </button>
+                `;
+                createNewDiv.addEventListener('click', function() {
+                    createAvatarModal.classList.add('active');
+                });
+                
+                avatarsGrid.appendChild(createNewDiv);
+                
+                // Re-attach event listeners to use avatar buttons
+                document.querySelectorAll('.use-avatar-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const avatarId = parseInt(this.getAttribute('data-avatar-id'));
+                        const avatar = avatars.find(a => a.id === avatarId);
+                        if (avatar) {
+                            currentAvatar = avatar;
+                            document.getElementById('use-avatar').checked = true;
+                            document.getElementById('avatarOptions').classList.remove('hidden');
+                            
+                            // Highlight selected avatar
+                            document.querySelectorAll('.use-avatar-btn').forEach(b => {
+                                b.classList.remove('bg-indigo-600', 'text-white');
+                                b.classList.add('bg-white', 'text-gray-700');
+                            });
+                            this.classList.remove('bg-white', 'text-gray-700');
+                            this.classList.add('bg-indigo-600', 'text-white');
+                            
+                            alert(`Avatar "${avatar.name}" selecionado para uso!`);
+                        }
+                    });
+                });
+            }
+            
+            function updateAvatarSelection() {
+                const avatarSelection = document.getElementById('avatarSelection');
+                avatarSelection.innerHTML = '';
+                
+                avatars.forEach(avatar => {
+                    const avatarDiv = document.createElement('div');
+                    avatarDiv.className = 'border border-gray-300 rounded-md p-2 cursor-pointer hover:border-indigo-500';
+                    avatarDiv.innerHTML = `
+                        <div class="h-16 w-16 rounded-md overflow-hidden mx-auto">
+                            <img src="${avatar.image}" alt="${avatar.name}" class="h-full w-full object-cover">
+                        </div>
+                        <div class="text-xs text-center mt-1">${avatar.name}</div>
+                    `;
+                    
+                    avatarDiv.addEventListener('click', function() {
+                        currentAvatar = avatar;
+                        
+                        // Highlight selected avatar
+                        avatarSelection.querySelectorAll('div').forEach(div => {
+                            div.classList.remove('border-indigo-500');
+                            div.classList.add('border-gray-300');
+                        });
+                        this.classList.remove('border-gray-300');
+                        this.classList.add('border-indigo-500');
+                    });
+                    
+                    avatarSelection.appendChild(avatarDiv);
+                });
+            }
+            
+            // Create Assistant Button
+            const createAssistantBtn = document.getElementById('createAssistantBtn');
+            const createAssistantModal = document.getElementById('createAssistantModal');
+            const closeAssistantModal = document.getElementById('closeAssistantModal');
+            const cancelAssistantBtn = document.getElementById('cancelAssistantBtn');
+            const saveAssistantBtn = document.getElementById('saveAssistantBtn');
+            
+            createAssistantBtn.addEventListener('click', function() {
+                createAssistantModal.classList.add('active');
+            });
+            
+            closeAssistantModal.addEventListener('click', function() {
+                createAssistantModal.classList.remove('active');
+            });
+            
+            cancelAssistantBtn.addEventListener('click', function() {
+                createAssistantModal.classList.remove('active');
+            });
+            
+            saveAssistantBtn.addEventListener('click', function() {
+                const name = document.getElementById('assistantName').value;
+                const tone = document.getElementById('assistantTone').value;
+                const prompt = document.getElementById('assistantPrompt').value;
+                
+                if (name && tone && prompt) {
+                    alert(`Assistente "${name}" criado com sucesso!`);
+                    createAssistantModal.classList.remove('active');
+                    
+                    // Reset form
+                    document.getElementById('assistantName').value = '';
+                    document.getElementById('assistantTone').value = 'professional';
+                    document.getElementById('assistantPrompt').value = '';
+                    document.getElementById('assistantExample').value = '';
+                } else {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                }
+            });
+            
+            // Connect Social Media
+            const connectBtns = document.querySelectorAll('.connect-btn');
+            const disconnectBtns = document.querySelectorAll('.disconnect-btn');
+            const connectSocialModal = document.getElementById('connectSocialModal');
+            const closeConnectModal = document.getElementById('closeConnectModal');
+            const cancelConnectBtn = document.getElementById('cancelConnectBtn');
+            const proceedToAuthBtn = document.getElementById('proceedToAuthBtn');
+            const backToScopesBtn = document.getElementById('backToScopesBtn');
+            const startAuthBtn = document.getElementById('startAuthBtn');
+            const retryAuthBtn = document.getElementById('retryAuthBtn');
+            
+            let currentPlatform = '';
+            
+            connectBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    currentPlatform = this.getAttribute('data-platform');
+                    showConnectModal(currentPlatform);
+                });
+            });
+            
+            disconnectBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const platform = this.getAttribute('data-platform');
+                    disconnectAccount(platform);
+                });
+            });
+            
+            function showConnectModal(platform) {
+                // Update modal content based on platform
+                const platformData = {
+                    instagram: {
+                        name: 'Instagram',
+                        icon: 'fab fa-instagram text-pink-600',
+                        color: 'pink'
+                    },
+                    facebook: {
+                        name: 'Facebook',
+                        icon: 'fab fa-facebook text-blue-600',
+                        color: 'blue'
+                    },
+                    tiktok: {
+                        name: 'TikTok',
+                        icon: 'fab fa-tiktok text-gray-800',
+                        color: 'gray'
+                    },
+                    linkedin: {
+                        name: 'LinkedIn',
+                        icon: 'fab fa-linkedin text-blue-700',
+                        color: 'blue'
+                    },
+                    youtube: {
+                        name: 'YouTube',
+                        icon: 'fab fa-youtube text-red-600',
+                        color: 'red'
+                    }
+                };
+                
+                const data = platformData[platform];
+                if (data) {
+                    document.querySelector('#socialIconLarge i').className = data.icon;
+                    document.querySelector('#oauthStep1 h4').textContent = `Conectar ao ${data.name}`;
+                    connectSocialModal.classList.add('active');
+                }
+            }
+            
+            closeConnectModal.addEventListener('click', function() {
+                connectSocialModal.classList.remove('active');
+                resetOAuthSteps();
+            });
+            
+            cancelConnectBtn.addEventListener('click', function() {
+                connectSocialModal.classList.remove('active');
+                resetOAuthSteps();
+            });
+            
+            proceedToAuthBtn.addEventListener('click', function() {
+                document.getElementById('oauthStep1').classList.remove('active');
+                document.getElementById('oauthStep2').classList.add('active');
+            });
+            
+            backToScopesBtn.addEventListener('click', function() {
+                document.getElementById('oauthStep2').classList.remove('active');
+                document.getElementById('oauthStep1').classList.add('active');
+            });
+            
+            startAuthBtn.addEventListener('click', function() {
+                document.getElementById('oauthStep2').classList.remove('active');
+                document.getElementById('oauthStep3').classList.add('active');
+                
+                // Simulate OAuth process
+                simulateOAuth();
+            });
+            
+            retryAuthBtn.addEventListener('click', function() {
+                simulateOAuth();
+            });
+            
+            function simulateOAuth() {
+                let progress = 50;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    document.getElementById('authProgress').textContent = progress + '%';
+                    document.getElementById('authProgressBar').style.width = progress + '%';
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            connectSocialModal.classList.remove('active');
+                            connectAccount(currentPlatform);
+                            resetOAuthSteps();
+                        }, 1000);
+                    }
+                }, 500);
+            }
+            
+            function resetOAuthSteps() {
+                document.querySelectorAll('.oauth-step').forEach(step => {
+                    step.classList.remove('active');
+                });
+                document.getElementById('oauthStep1').classList.add('active');
+                document.getElementById('authProgress').textContent = '50%';
+                document.getElementById('authProgressBar').style.width = '50%';
+            }
+            
+            function connectAccount(platform) {
+                const accountElement = document.querySelector(`[data-platform="${platform}"]`);
+                if (accountElement) {
+                    // Update UI to show connected state
+                    const statusElement = accountElement.querySelector('.inline-flex');
+                    const usernameElement = accountElement.querySelector('[data-username]');
+                    const buttonElement = accountElement.querySelector('button');
+                    
+                    statusElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                    statusElement.textContent = 'Conectado';
+                    
+                    usernameElement.textContent = platform === 'instagram' ? '@seu_perfil' : 
+                                                platform === 'facebook' ? 'Sua Página' :
+                                                platform === 'tiktok' ? '@seu_tiktok' :
+                                                platform === 'linkedin' ? 'Seu Perfil' :
+                                                'Seu Canal';
+                    
+                    buttonElement.className = 'disconnect-btn inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50';
+                    buttonElement.textContent = 'Desconectar';
+                    buttonElement.setAttribute('data-platform', platform);
+                    
+                    // Re-attach event listener
+                    buttonElement.addEventListener('click', function() {
+                        disconnectAccount(platform);
+                    });
+                    
+                    // Update border style
+                    accountElement.className = 'social-account flex items-center justify-between p-4 border border-gray-200 rounded-lg';
+                    
+                    alert(`${platform.charAt(0).toUpperCase() + platform.slice(1)} conectado com sucesso!`);
+                }
+            }
+            
+            function disconnectAccount(platform) {
+                const accountElement = document.querySelector(`[data-platform="${platform}"]`);
+                if (accountElement) {
+                    // Update UI to show disconnected state
+                    const statusElement = accountElement.querySelector('.inline-flex');
+                    const usernameElement = accountElement.querySelector('[data-username]');
+                    const buttonElement = accountElement.querySelector('button');
+                    
+                    statusElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800';
+                    statusElement.textContent = 'Desconectado';
+                    
+                    usernameElement.textContent = 'Não conectado';
+                    
+                    buttonElement.className = 'connect-btn inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700';
+                    buttonElement.textContent = 'Conectar';
+                    buttonElement.setAttribute('data-platform', platform);
+                    
+                    // Re-attach event listener
+                    buttonElement.addEventListener('click', function() {
+                        showConnectModal(platform);
+                    });
+                    
+                    // Update border style
+                    accountElement.className = 'social-account flex items-center justify-between p-4 border-2 border-dashed border-gray-300 rounded-lg';
+                    
+                    alert(`${platform.charAt(0).toUpperCase() + platform.slice(1)} desconectado.`);
+                }
+            }
+            
+            // Use Avatar Checkbox
+            const useAvatarCheckbox = document.getElementById('use-avatar');
+            const avatarOptions = document.getElementById('avatarOptions');
+            
+            useAvatarCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    avatarOptions.classList.remove('hidden');
+                } else {
+                    avatarOptions.classList.add('hidden');
+                }
+            });
+            
+            // Generate Images Checkbox
+            const generateImagesCheckbox = document.getElementById('generate-images');
+            const imageOptions = document.getElementById('imageOptions');
+            
+            generateImagesCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    imageOptions.classList.remove('hidden');
+                } else {
+                    imageOptions.classList.add('hidden');
+                }
+            });
+            
+            // Content Type Change
+            const contentTypeSelect = document.getElementById('contentType');
+            const imageSizeSelect = document.getElementById('imageSize');
+            
+            contentTypeSelect.addEventListener('change', function() {
+                const contentType = this.value;
+                
+                // Update image size options based on content type
+                imageSizeSelect.innerHTML = '';
+                
+                if (contentType === 'feed') {
+                    imageSizeSelect.innerHTML = `
+                        <option value="square">Quadrado (1:1) - Instagram Feed</option>
+                        <option value="portrait">Retrato (4:5) - Instagram Feed</option>
+                    `;
+                } else if (contentType === 'story') {
+                    imageSizeSelect.innerHTML = `
+                        <option value="story">Story (9:16) - Instagram Story</option>
+                    `;
+                } else if (contentType === 'reel') {
+                    imageSizeSelect.innerHTML = `
+                        <option value="reel">Reel (9:16) - Instagram Reel</option>
+                    `;
+                } else if (contentType === 'carousel') {
+                    imageSizeSelect.innerHTML = `
+                        <option value="square">Quadrado (1:1) - Instagram Carousel</option>
+                    `;
+                    // Update image count options for carousel
+                    const imageCountSelect = document.getElementById('imageCount');
+                    imageCountSelect.innerHTML = `
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    `;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
